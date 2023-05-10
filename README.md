@@ -1,6 +1,6 @@
 # Customer-Acquisition-Analysis
 
-roject Title: Customer Acquisition Analysis for Game Fun: Evaluating the Impact of Digital Advertising
+Project Title: Customer Acquisition Analysis for Game Fun: Evaluating the Impact of Digital Advertising
 
 # Project Description:
 
