@@ -1,0 +1,410 @@
+---
+title: "Assignment1 Big Data"
+author: "Anchal Chaudhary"
+date: "2023-04-13"
+output: html_document
+---
+
+```{r}
+
+library(readxl)
+library(dplyr)
+Data <- read_excel("/Users/anchalchaudhary/Downloads/GameFun.xlsx")
+
+
+
+Test <- filter(Data,Data$test==1)
+Control <- filter(Data,Data$test==0)
+
+#1 
+#part a - Yes, it is important to ensure that the test and control groups are probabilistically equivalent on their observables before evaluating the effect of an experiment. One way to check this is by comparing the distribution of the demographic variables (gender, income, and gamer) and the website that a customer visited between the test and control groups. If there are significant differences in the distributions of these variables, it may indicate that the randomization process was not effective and that there may be biases in the experiment results. To check for probabilistic equivalence, you can use statistical tests such as t-tests or chi-squared tests to compare the means or proportions of the variables between the test and control groups. If the p-values of these tests are greater than the significance level (usually 0.05), then it indicates that there are no significant differences between the groups and that they are probabilistically equivalent.
+
+
+GenderMeanTest <- mean(Test$gender)
+GenderMeanControl <- mean(Control$gender)
+
+GenderMeanPD <- (GenderMeanTest - GenderMeanControl)*100/GenderMeanControl
+#-.095%
+
+GamerMeanTest <- mean(Test$gamer)
+GamerMeanControl <- mean(Control$gamer)
+
+GamerMeanPD <- (GamerMeanTest - GamerMeanControl)*100/GamerMeanControl
+#-.081%
+
+IncomeMeanTest <- mean(Test$income)
+IncomeMeanControl <- mean(Control$income)
+
+IncomeMeanPD <- (IncomeMeanTest - IncomeMeanControl)*100/IncomeMeanControl
+#-.41%
+
+t.test(Test$gender,Control$gender,alternative = 'two.sided') 
+t.test(Test$gamer,Control$gamer,alternative = 'two.sided')
+t.test(Test$income,Control$income,alternative = 'two.sided')
+#T tests proves that the difference is not statistically significant as we fail to reject the null hypothesis.
+
+#b The metrics calculated (i.e., the means and percentage differences) suggest that there are no significant differences between the test and control groups with respect to the demographic variables of gender, gamer, and income. Specifically, the percentage differences are quite small, ranging from -0.095% to -0.41%, indicating that the means of the variables are nearly identical across the two groups. These findings suggest that the randomization process used in the experiment was successful in creating two equivalent groups that are comparable with respect to their demographic characteristics. This is important because it ensures that any differences in the purchase rates between the two groups can be attributed to the treatment (i.e., the display ad campaign) and not to any pre-existing differences between the groups.
+
+
+#c If a large difference between test and control groups is found before executing an experiment, it indicates that the two groups are not probabilistically equivalent. In such a case, it is crucial to investigate and identify the reasons for the imbalance. Possible reasons for the imbalance may include incorrect randomization, sample selection bias, or other factors that may have influenced the allocation of subjects to the test and control groups.
+#In such a situation, it is essential to address the issue and try to balance the groups to ensure that any difference in the outcome is attributable to the treatment and not to any confounding variables. One way to address the issue is to increase the sample size, which may help in balancing the groups. Alternatively, it may be necessary to adjust for any confounding variables by using statistical techniques such as regression analysis or propensity score matching. It is important to note that identifying and addressing issues with the experimental design before executing the experiment is critical to ensure that the results are reliable and unbiased.
+
+#d
+#Traditional statistical significance tests are based on the assumption that the sample size is relatively small compared to the population size. These tests rely on the central limit theorem, which states that the distribution of sample means approaches a normal distribution as the sample size increases. This allows for the use of techniques such as the t-test or ANOVA to test for differences between groups or the correlation between variables.However, when dealing with "big data" where the sample size is very large, traditional statistical significance tests may not be appropriate for several reasons:
+
+#Statistical significance does not necessarily imply practical significance: With large sample sizes, even small differences between groups or correlations between variables can be statistically significant, but the effect size may be so small that it has no practical significance. In other words, the difference or correlation may be statistically significant, but it may not be meaningful in the real world.
+
+#Type I errors: With large sample sizes, the probability of a Type I error (rejecting the null hypothesis when it is true) increases. This is because even small deviations from the null hypothesis can lead to statistically significant results, which may not reflect a true effect.
+
+#Computational limitations: Traditional statistical significance tests may become computationally impractical or impossible with very large sample sizes, as they require a lot of memory and processing power.
+
+#Assumptions may be violated: With very large sample sizes, assumptions such as normality, homogeneity of variance, and independence may be violated, which can lead to biased or incorrect results.
+
+#Therefore, alternative methods may be more appropriate for analyzing big data, such as machine learning algorithms or resampling techniques like bootstrapping or permutation tests. These methods do not rely on the assumptions of traditional statistical tests and can handle very large sample sizes more effectively.
+```
+
+
+```{r}
+
+#Q2
+
+#report the average purchase rate for the test, average purchase
+#rate for the control and the absolute difference (not the % difference) between the test and control.
+
+#a-  All Customers
+PurchaseMeanTest <- mean(Test$purchase)
+PurchaseMeanControl <- mean(Control$purchase)
+
+t.test(Test$purchase,Control$purchase,alternative = 'two.sided')
+t.test(Test$purchase,Control$purchase,alternative = 'greater')
+
+absdiff_allcust = PurchaseMeanTest - PurchaseMeanControl
+
+
+gamefun <- read_excel("/Users/anchalchaudhary/Downloads/GameFun.xlsx")
+#b Male vs Female Customers
+male_avg_purchase_test <- mean(gamefun$purchase[gamefun$test == 1 & gamefun$gender == 1])
+male_avg_purchase_control <- mean(gamefun$purchase[gamefun$test == 0 & gamefun$gender == 1])
+male_diff_purchase <- abs(male_avg_purchase_test - male_avg_purchase_control)
+female_avg_purchase_test <- mean(gamefun$purchase[gamefun$test == 1 & gamefun$gender == 0])
+female_avg_purchase_control <- mean(gamefun$purchase[gamefun$test == 0 & gamefun$gender == 0])
+female_diff_purchase <- abs(female_avg_purchase_test - female_avg_purchase_control)
+cat("Comparison 2: Male vs Female customers\n")
+cat("Avg. purchase rate for males in test group:", round(male_avg_purchase_test, 4), "\n")
+cat("Avg. purchase rate for males in control group:", round(male_avg_purchase_control, 4), "\n")
+cat("Absolute difference for males:", round(male_diff_purchase, 4), "\n")
+cat("Avg. purchase rate for females in test group:", round(female_avg_purchase_test, 4), "\n")
+cat("Avg. purchase rate for females in control group:", round(female_avg_purchase_control, 4), "\n")
+cat("Absolute difference for females:", round(female_diff_purchase, 4), "\n\n")
+
+
+#c  Comparison 3: Gamers vs Non-Gamers Customers
+gamer_avg_purchase_test <- mean(gamefun$purchase[gamefun$test == 1 & gamefun$gamer == 1])
+gamer_avg_purchase_control <- mean(gamefun$purchase[gamefun$test == 0 & gamefun$gamer == 1])
+gamer_diff_purchase <- abs(gamer_avg_purchase_test - gamer_avg_purchase_control)
+nongamer_avg_purchase_test <- mean(gamefun$purchase[gamefun$test == 1 & gamefun$gamer == 0])
+nongamer_avg_purchase_control <- mean(gamefun$purchase[gamefun$test == 0 & gamefun$gamer == 0])
+nongamer_diff_purchase <- abs(nongamer_avg_purchase_test - nongamer_avg_purchase_control)
+cat("Comparison 3: Gamers vs Non-Gamers Customers\n")
+cat("Avg. purchase rate for gamers in test group:", round(gamer_avg_purchase_test, 4), "\n")
+cat("Avg. purchase rate for gamers in control group:", round(gamer_avg_purchase_control, 4), "\n")
+cat("Absolute difference for gamers:", round(gamer_diff_purchase, 4), "\n")
+cat("Avg. purchase rate for non-gamers in test group:", round(nongamer_avg_purchase_test, 4), "\n")
+cat("Avg. purchase rate for non-gamers in control group:", round(nongamer_avg_purchase_test, 4), "\n")
+
+#d Female Gamers vs Male Gamers
+
+# Subset the data for Female Gamers and Male Gamers
+female_gamers <- subset(gamefun, gamefun$gender == 0 & gamefun$gamer == 1)
+male_gamers <- subset(gamefun, gamefun$gender == 1 & gamefun$gamer == 1)
+
+female_gamers_test <- mean(female_gamers$purchase[female_gamers$test == 1])
+female_gamers_control <- mean(female_gamers$purchase[female_gamers$test == 0])
+female_gamers_diff <- abs(female_gamers_test - female_gamers_control)
+cat("Absolute difference for female gamers:", round(female_gamers_diff, 4), "\n")
+male_gamers_test <- mean(male_gamers$purchase[male_gamers$test == 1])
+male_gamers_control <- mean(male_gamers$purchase[male_gamers$test == 0])
+male_gamers_diff <- abs(male_gamers_test - male_gamers_control)
+cat("Absolute difference for male gamers:", round(male_gamers_diff, 4), "\n")
+
+#3 Expected Revenue
+
+## 3 (a)All Customers
+TestRevenuePerCustomer =  12.5 * PurchaseMeanTest
+ControlRevenuePerCustomer = 37.5 * PurchaseMeanControl
+
+cat(" Average Test Revenue per user:",  TestRevenuePerCustomer, "\n")
+cat(" Average Control Revenue per user :", ControlRevenuePerCustomer , "\n")
+#Average Test Revenue per user: 0.960272 
+#Average Control Revenue per user : 1.357991 
+
+
+TestTotalRevenue = nrow(Test)* 12.5 * PurchaseMeanTest
+ControlTotalRevenue = nrow(Control)* 37.5 * PurchaseMeanControl
+
+cat("Total Test Revenue:",  TestTotalRevenue, "\n")
+cat(" Total Control Revenue:", ControlTotalRevenue, "\n")
+
+#on an average Total Test Revenue: 26975 
+#on an average Total Control Revenue: 16237.5 
+
+## 3(b)Female Gamers vs Male Gamers
+TestMaleG =  12.5 * male_gamers_test
+TestFemaleG =  12.5 * female_gamers_test
+
+ControlMaleG = 37.5 * male_gamers_control
+ControlFG = 37.5 * female_gamers_control
+
+cat(" Test Revenue per customer for male gamers:",  TestMaleG ,"\n")
+cat("Test Revenue per customer for female gamers:", TestFemaleG, "\n")
+cat("  Control Revenue per customer for male gamers:",  ControlMaleG ,"\n")
+cat(" Control Revenue per customer for female gamers:", ControlFG, "\n")
+
+# on an average  Test Revenue per customer for male gamers: 1.267551 
+#on an average Test Revenue per customer for female gamers: 1.376147 
+#on an average Control Revenue per customer for male gamers: 1.397815 
+#on an average Control Revenue per customer for female gamers: 1.201543 
+
+TestGroup_MaleGamer<- subset(gamefun, gamefun$gender == 1 & gamefun$gamer == 1 & gamefun$test == 1)
+ControlGroup_MaleGamer=subset(gamefun, gamefun$gender == 1 & gamefun$gamer == 1 & gamefun$test == 0)
+TestGroup_FemaleGamer= subset(gamefun, gamefun$gender == 0 & gamefun$gamer == 1 & gamefun$test == 1)
+ControlGroup_FemaleGamer= subset(gamefun, gamefun$gender == 0 & gamefun$gamer == 1 & gamefun$test == 0)
+
+MGTestTotalRevenue = nrow(TestGroup_MaleGamer)* 12.5 * male_gamers_test
+ControTotalRevenue = nrow(ControlGroup_MaleGamer)* 37.5 * male_gamers_control
+
+FGTestTotalRevenue= nrow(TestGroup_FemaleGamer)* 12.5 * female_gamers_test
+FGControlTotalRevenue = nrow(ControlGroup_FemaleGamer)* 37.5 *female_gamers_test
+
+cat("Total Test Revenue for male gamers:",  MGTestTotalRevenue ,"\n")
+cat("Total Test Revenue for female gamers:",  FGTestTotalRevenue, "\n")
+cat(" Total Control Revenue for male gamers:", ControTotalRevenue , "\n")
+cat(" Total Control Revenue for female gamers:", FGControlTotalRevenue, "\n")
+
+
+#On average Total Test Revenue for male gamers: 13812.5 
+#On average Total Test Revenue for female gamers: 8250 
+# On average Total Control Revenue for male gamers: 6525 
+#On average Total Control Revenue for female gamers: 10436.7 
+
+
+#4 Based on the analysis, the promotion appears to have a positive impact on revenue for both the test and control groups. The average revenue per customer in the test group was lower than the control group, but the total revenue for the test group was higher.
+#In terms of gender, female gamers had a higher average revenue per customer in the test group, while male gamers had a higher average revenue per customer in the control group. However, the total revenue for female gamers was higher in the control group, while the total revenue for male gamers was higher in the test group.
+#Overall, it seems that Game-Fun should run this promotion again in the future, but it should be offered to a targeted segment instead of all customers. Based on the analysis, female gamers in the control group appeared to be the most lucrative segment, with the highest average revenue per customer and total revenue. Therefore, Game-Fun could consider offering the promotion to this segment in the future to maximize revenue.
+
+
+
+
+
+
+```
+```{r}
+#EXERCISE 2
+#1
+#The data contains three variables: instrument (equals one if the mother was offered a vitamin A
+#shot for her baby), treatment (equals one if the baby got the vitamin A shot) and outcome
+#(equals one if the baby did not survive).
+
+
+#a
+data <- read.csv("sommer_deger.csv")
+df <- data.frame(data)
+
+# Subset mothers were offered Vitamin A shot
+offerred <- df %>% filter(df$instrument == 1)
+
+# Calculate percentage of babies who died among those whose mothers were offered a shot
+baby_died_treated <- (sum(offerred$outcome) / nrow(offerred))*100
+baby_died_treated
+#The percent of babies whose mothers were offered Vitamin A shots for their babies that died is 0.38%.
+
+#  b
+
+# Subset  Subset mothers were not offered Vitamin A shot
+notofferred  <- df %>% filter(df$instrument == 0)
+
+
+# Calculate percentage of babies who died among those whose mothers were not offered a shot
+baby_died_not_treated <- (sum(notofferred$outcome) / nrow(notofferred ))*100
+baby_died_not_treated
+
+#The percent of babies whose mothers were not offered Vitamin A shots for their babies that died is 0.64%.
+
+#c - difference in mortality 
+diff_mortality <- baby_died_treated - baby_died_not_treated
+diff_mortality
+#c. The difference in mortality is the difference between the percentage of babies who received the shot and did not survive and the percentage of babies who did not receive the shot and did not survive. Under the assumption that there are no other systematic differences between the two groups, the difference in mortality is a valid estimate of the causal impact of receiving Vitamin A shots on survival. In other words, if we assume that the only difference between the two groups is whether or not they received the shot, then any difference in outcomes must be due to the treatment. However, it is possible that there are other differences between the two groups that could affect the outcome, such as differences in socioeconomic status, access to healthcare, or environmental factors. In that case, the difference in mortality may not be a valid estimate of the causal impact of receiving Vitamin A shots on survival.
+
+
+
+#In the Sommer and Ziegler (1991) study, the Vitamin A supplements were randomly assigned to villages, but some of the individuals in villages who were assigned to the treatment group failed to receive them. This means that the study suffered from one-sided non-compliance, which occurs when some individuals in the treatment group do not receive the treatment. In this case, none of the individuals in the control group received the supplements.
+#One-sided non-compliance can introduce bias into the analysis because it can make the treatment group more similar to the control group than it would be if everyone in the treatment group had received the treatment. This can lead to an underestimate of the treatment effect, which means that the difference in mortality between the treatment group and the control group may be smaller than it would be if everyone in the treatment group had received the Vitamin A supplements.
+#Therefore, although the difference in mortality of -0.26% suggests that receiving Vitamin A shots for babies may reduce their risk of mortality, we need to be cautious in interpreting this result due to the one-sided non-compliance issue in the study.
+
+#The difference in mortality of -0.26% means that the percentage of babies who died among those whose mothers were offered a Vitamin A shot was 0.26% lower than the percentage of babies who died among those whose mothers were not offered a Vitamin A shot. In other words, the evidence suggests that receiving Vitamin A shots for babies may reduce their risk of mortality. However, we need to be cautious in interpreting this result because of the one-sided non-compliance issue in the study. 
+
+
+#2a
+
+
+# Subset babies who received Vitamin A shots
+treated <- df %>% filter(df$treatment == 1)
+
+# Calculate percentage of babies who died among those who received Vitamin A shots
+baby_died_treated <- (sum(treated$outcome) / nrow(treated))*100
+baby_died_treated
+
+#The percent of babies who received Vitamin A shots that died is 0.12%.
+#2b
+# Subset babies who did not receive Vitamin A shots
+untreated <- df %>% filter(df$treatment == 0)
+
+# Calculate percentage of babies who died among those who did not receive Vitamin A shots
+baby_died_untreated <- (sum(untreated$outcome) / nrow(untreated))*100
+baby_died_untreated
+
+#The percent of babies who did not receive Vitamin A shots that died is 0.77%.
+
+#2c
+
+diff_mortality <- baby_died_treated - baby_died_untreated
+diff_mortality
+
+#The difference in mortality is -0.64%. This means that the mortality rate was lower among babies who received a Vitamin A shot compared to those who did not receive a shot.
+
+#Assuming that the only systematic difference between the two groups is whether or not they received Vitamin A shots, the difference in mortality can be interpreted as the causal impact of receiving vitamin A shots on survival. This is known as the "Intention-to-Treat" (ITT) estimate of treatment effect. However, this assumption may not always hold true in practice. There may be other factors that influence both whether a baby receives Vitamin A shots and their likelihood of survival, such as socioeconomic status, access to healthcare, or underlying health conditions. If these factors are not accounted for, the difference in mortality may be biased and not a valid estimate of the causal impact of receiving Vitamin A shots on survival. In this case, more sophisticated statistical methods, such as regression analysis, may be needed to estimate the causal impact of the treatment while controlling for these confounding factors.
+# However, as mentioned earlier, we need to be cautious in interpreting this result due to the non-compliance issue in the study.
+
+
+# 3a
+  
+# Subset babies whose mothers were offered Vitamin A shots
+offered <- df %>% filter(instrument == 1)
+
+# Calculate percentage of babies who received shots and died
+babies_died_received_shot <- (sum(offered$treatment == 1 & offered$outcome == 1) / sum(offered$treatment == 1)) * 100
+babies_died_received_shot
+
+#0.124% of babies who received Vitamin A shots whose mothers were offered Vitamin A shots died.
+  
+#b
+# Subset babies whose mothers were offered Vitamin A shots but did not accept them
+not_accepted <- offered %>% filter(treatment == 0)
+
+# Calculate percentage of babies who died among those whose mothers were offered but did not accept shots
+babies_died_not_accepted <- (sum(not_accepted$outcome == 1) / nrow(not_accepted)) * 100
+babies_died_not_accepted
+
+#1.4% of babies who have not received Vitamin A shots among those whose mothers were offered Vitamin A shots died.
+  
+#c
+
+diff_mortality_baby <- babies_died_received_shot- babies_died_not_accepted
+diff_mortality_baby
+
+#The difference in mortality is -1.28%, meaning that the mortality rate is lower for babies who received Vitamin A shots compared to those whose mothers were offered the shots but did not accept them. 
+
+#The validity of this estimate depends on the assumption that the only difference between the two groups is whether or not they received Vitamin A shots. If there are other factors that differ between the two groups, such as differences in health status or access to healthcare, then the difference in mortality may be biased and not accurately reflect the causal impact of receiving Vitamin A shots on survival. Additionally, the assumption of no hidden bias needs to be satisfied.
+
+
+#4 a. To compute the Wald estimate, we need to first calculate the percentage of babies who died in the group that received Vitamin A shots and the group that did not receive Vitamin A shots.
+
+### % of babies who were offered a shot died
+mom_treat <- df %>% filter(df$instrument == 1)
+
+# Calculate percentage of babies who died among those whose mothers were offered a shot
+baby_died_treated <- (sum(mom_treat$outcome) / nrow(mom_treat))*100
+
+### % of babies not offered shots that died
+
+# Subset data to only include rows where instrument = 0
+mom_no_treat <- df2 %>% filter(df2$instrument == 0)
+
+# Calculate percentage of babies who died among those whose mothers were not offered a shot
+baby_died_not_treated <- (sum(mom_no_treat$outcome) / nrow(mom_no_treat))*100
+
+### % of babies who were offered a shot and received it
+percent_offered_received <- (sum(mom_treat$treatment)/ nrow(mom_treat))*100
+
+
+#wald estimate
+wald_estimate <- (baby_died_treated - baby_died_not_treated)/(percent_offered_received)
+wald_estimate
+#The Wald estimate is : -0.003228039
+
+# b. The Wald estimate assumes that there is no selection bias, which means that the groups receiving and not receiving Vitamin A shots are comparable and any differences in mortality rates are due solely to the effect of the Vitamin A shots.The validity of the Wald estimate as an estimate of the causal impact of vitamin A shots on survival is based on certain assumptions. Firstly, it assumes that the assignment of the vitamin A shots to villages was done randomly, which ensures that there are no systematic differences between the treatment and control groups. Secondly, the treatment status of each baby should be consistent with the treatment assignment of its village. This means that if a village was assigned to receive the treatment, all babies in that village should have received it, and if a village was assigned to the control group, no baby in that village should have received the treatment. Thirdly, the effect of receiving the treatment should only operate through the variable being manipulated (in this case, the vitamin A shot). There should be no other variables that are affected by the treatment that could influence the outcome. Finally, the treatment status of one baby should not affect the outcome of another baby, which means there should be no spillover effects from the treatment.
+
+
+#c 
+SE_Wald <- sqrt((1 / babies_died_treated) + (1 / (total_babies_treated - babies_died_treated)) + (1 / babies_died_not_treated) + (1 / (total_babies_not_treated - babies_died_not_treated)))
+SE_Wald
+
+
+model1 <- glm (outcome ~ instrument , data =df2, family = 'binomial')
+
+#summary of the model1
+summary(model1)
+
+#standard error
+se1 <- summary(model1)$coefficients[2, 2]
+se1
+
+#The standard error for the intent-to-treat estimate is 0.1882078
+
+
+
+#For Wald estimate, we have to perform 2 stage estimate TSLS
+
+# Stage 1
+model_a <- glm(treatment ~ instrument, data = df2,  family='binomial')
+summary(model_a)
+
+# 2 unique values, if instrument is 0 or 1
+df2$treatment_hat <- predict(model_a)
+
+#Stage 2
+model_b <- glm(outcome ~ treatment_hat, data = df2,  family='binomial')
+summary(model_b)
+
+#standard error
+se2 <- summary(model_b)$coefficients[2,2]
+se2
+#The Standard error for the Wald estimate recommended by the fourth data scientist is 0.008573505
+
+#Part 1:
+#The larger standard error observed in the instrumental variable (IV) estimate compared to the intent-to-treat estimate is due to the two-step regression process used in the IV method. This process introduces additional uncertainty, which is not accounted for in the intent-to-treat method that only compares the effect of receiving the treatment or not. Specifically, in the first stage of the IV method, the effect of the IV on the treatment is estimated, which further increases the uncertainty and hence results in a larger standard error compared to the SE of the intent-to-treat estimator.
+
+#Part 2:
+
+#Unobserved confounding variables such as socioeconomic status, access to healthcare, environmental factors, and maternal beliefs in medication could potentially bias the standard errors of the intent-to-treat and two-stage least squares (2SLS) estimators if not taken into account. However, gathering information about all these factors is difficult in practice, and therefore modeling assumptions and matching may be employed to mitigate potential bias. By adjusting for these factors, we can obtain more accurate standard errors and reduce bias in our estimates.
+
+
+
+
+
+
+
+```
+
+
+
+```{r }
+
+
+
+
+```
+
+
+```{r }
+
+
+
+
+
+
+
+
+```
+
+
